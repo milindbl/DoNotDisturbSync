@@ -18,6 +18,7 @@ package se.blunden.donotdisturbsync;
 
 import android.app.NotificationManager;
 import android.content.Context;
+import android.media.AudioManager;
 import android.util.Log;
 
 import com.google.android.gms.wearable.MessageEvent;
@@ -33,6 +34,7 @@ public class WearMessageListenerService extends WearableListenerService {
             // Read the received DND mode and convert it back to an integer
             int newMode = Integer.parseInt(new String(messageEvent.getData()));
 
+            Log.d(TAG, "----------------");
             Log.d(TAG, "Received new DND mode " + newMode + " from source " + messageEvent.getSourceNodeId());
 
             NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -42,6 +44,7 @@ public class WearMessageListenerService extends WearableListenerService {
             if (mNotificationManager.isNotificationPolicyAccessGranted()) {
                 // Avoid unnecessarily triggering extra DND mode change events
                 if (newMode == mNotificationManager.getCurrentInterruptionFilter()) {
+                    Log.i(TAG, "Same mode");
                     return;
                 }
 
@@ -57,6 +60,13 @@ public class WearMessageListenerService extends WearableListenerService {
 
                 Log.d(TAG, "Attempting to set adjusted DND mode " + newMode);
                 mNotificationManager.setInterruptionFilter(newMode);
+
+                if (newMode == NotificationManager.INTERRUPTION_FILTER_ALL) {
+                    Log.d(TAG, "Setting to vibrate no remove sound on device");
+                    AudioManager audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
+                    audioManager.setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
+                }
+
             } else {
                 Log.d(TAG, "App is not allowed to change Do Not Disturb mode without applying workaround");
             }
