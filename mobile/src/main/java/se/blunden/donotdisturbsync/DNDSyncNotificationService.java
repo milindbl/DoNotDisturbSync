@@ -63,7 +63,7 @@ public class DNDSyncNotificationService extends NotificationListenerService {
         }).start();
     }
 
-    private void sendDNDSyncMessage(int dndMode) {
+    public void sendDNDSyncMessage(int dndMode) {
         Log.i(TAG, "Syncing new DND mode " + dndMode +" to nearby paired devices");
 
         // Search for compatible devices

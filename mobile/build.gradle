@@ -21,6 +21,7 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.work:work-runtime:2.7.1'
 
     wearApp project(path: ':wear')
     implementation 'com.google.android.gms:play-services-wearable:17.1.0'

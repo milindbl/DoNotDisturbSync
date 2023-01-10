@@ -33,6 +33,11 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "DndSync";
@@ -51,6 +56,13 @@ public class MainActivity extends AppCompatActivity {
                 showPermissionGrantingSettings();
             }
         });
+
+        PeriodicWorkRequest workRequest = new PeriodicWorkRequest
+                .Builder(PeriodicDNDSyncWorker.class, 1, TimeUnit.HOURS)
+                .setInitialDelay(3, TimeUnit.MINUTES)
+                .build();
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork("dnd_custom_worker", ExistingPeriodicWorkPolicy.KEEP, workRequest);
     }
 
     private void hideLauncherIcon() {
