@@ -42,6 +42,10 @@ import java.util.concurrent.TimeUnit;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "DndSync";
 
+    public static final String UNIQUE_WORKER_NAME = "dnd_sync_custom_worker";
+    public static final int UNIQUE_WORKER_REPEAT_INTERVAL = 45;
+    public static final TimeUnit UNIQUE_WORKER_REPEAT_INTERVAL_UNIT = TimeUnit.MINUTES;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,12 +61,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        initPeriodicWork(this);
+    }
+
+    public static void initPeriodicWork(Context context) {
         PeriodicWorkRequest workRequest = new PeriodicWorkRequest
-                .Builder(PeriodicDNDSyncWorker.class, 1, TimeUnit.HOURS)
+                .Builder(PeriodicDNDSyncWorker.class, UNIQUE_WORKER_REPEAT_INTERVAL, UNIQUE_WORKER_REPEAT_INTERVAL_UNIT)
                 .setInitialDelay(3, TimeUnit.MINUTES)
                 .build();
 
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork("dnd_custom_worker", ExistingPeriodicWorkPolicy.KEEP, workRequest);
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(UNIQUE_WORKER_NAME, ExistingPeriodicWorkPolicy.KEEP, workRequest);
     }
 
     private void hideLauncherIcon() {

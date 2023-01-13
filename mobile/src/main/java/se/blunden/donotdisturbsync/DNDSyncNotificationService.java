@@ -16,6 +16,7 @@
 
 package se.blunden.donotdisturbsync;
 
+import android.content.Context;
 import android.service.notification.NotificationListenerService;
 import android.util.Log;
 
@@ -29,6 +30,7 @@ import com.google.android.gms.wearable.CapabilityInfo;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 
+import java.lang.ref.SoftReference;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -63,13 +65,17 @@ public class DNDSyncNotificationService extends NotificationListenerService {
         }).start();
     }
 
-    public void sendDNDSyncMessage(int dndMode) {
+    private void sendDNDSyncMessage(int dndMode) {
+        sendDNDSyncMessage(dndMode, this);
+    }
+
+    public void sendDNDSyncMessage(int dndMode, Context context) {
         Log.i(TAG, "Syncing new DND mode " + dndMode +" to nearby paired devices");
 
         // Search for compatible devices
         CapabilityInfo capabilityInfo;
         try {
-            capabilityInfo = Tasks.await(Wearable.getCapabilityClient(this)
+            capabilityInfo = Tasks.await(Wearable.getCapabilityClient(context)
                     .getCapability(DND_SYNC_CAPABILITY, CapabilityClient.FILTER_REACHABLE));
         } catch (InterruptedException e) {
             Log.e(TAG, "InterruptedException when searching for compatible reachable devices");
@@ -89,7 +95,7 @@ public class DNDSyncNotificationService extends NotificationListenerService {
         } else {
             for (Node node : connectedNodes) {
                 if (node.isNearby()) {
-                    Wearable.getMessageClient(this)
+                    Wearable.getMessageClient(context)
                             .sendMessage(node.getId(), DND_SYNC_MODE, String.valueOf(dndMode).getBytes())
                             .addOnSuccessListener(new OnSuccessListener<Integer>() {
                                 @Override
